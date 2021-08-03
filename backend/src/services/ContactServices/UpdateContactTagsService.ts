@@ -1,4 +1,5 @@
 import AppError from "../../errors/AppError";
+import socketEmit from "../../helpers/socketEmit";
 import Contact from "../../models/Contact";
 import ContactTag from "../../models/ContactTag";
 
@@ -41,12 +42,25 @@ const UpdateContactService = async ({
   const contact = await Contact.findOne({
     where: { id: contactId, tenantId },
     attributes: ["id", "name", "number", "email", "profilePicUrl"],
-    include: ["extraInfo", "tags"]
+    include: [
+      "extraInfo",
+      "tags",
+      {
+        association: "wallets",
+        attributes: ["id", "name"]
+      }
+    ]
   });
 
   if (!contact) {
     throw new AppError("ERR_NO_CONTACT_FOUND", 404);
   }
+
+  socketEmit({
+    tenantId,
+    type: "contact:update",
+    payload: contact
+  });
 
   return contact;
 };
