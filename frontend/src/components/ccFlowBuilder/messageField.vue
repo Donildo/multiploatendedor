@@ -2,7 +2,7 @@
   <div>
     <q-card
       flat
-      class="q-pa-sm"
+      class="q-pa-sm q-pb-md"
     >
       <q-card-section class="q-pa-none">
         <div class="flex flex-inline full-width items-center">
@@ -40,14 +40,14 @@
           </div>
           <textarea
             ref="inputEnvioMensagem"
-            style="min-height: 20vh; max-height: 30vh; flex: auto"
+            style="min-height: 10vh; max-height: 30vh; flex: auto"
             class="q-pa-sm bg-white"
             placeholder="Digite a mensagem"
             autogrow
             dense
             outlined
-            @input="(v) => $attrs.element.data = v.target.value"
-            :value="$attrs.element.data"
+            @input="(v) => $attrs.element.data.message = v.target.value"
+            :value="$attrs.element.data.message"
           />
         </div>
       </q-card-section>
@@ -75,9 +75,9 @@ export default {
         return
       }
       // insert:
-      self.txtContent = this.$attrs.element.data
+      self.txtContent = this.$attrs.element.data.message
       self.txtContent = tmpStr.substring(0, startPos) + emoji.data + tmpStr.substring(endPos, tmpStr.length)
-      this.$attrs.element.data = self.txtContent
+      this.$attrs.element.data.message = self.txtContent
       // move cursor:
       setTimeout(() => {
         tArea.selectionStart = tArea.selectionEnd = cursorPos + emoji.data.length
