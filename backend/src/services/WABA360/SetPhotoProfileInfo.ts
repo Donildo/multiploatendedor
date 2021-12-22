@@ -27,7 +27,7 @@ const SetPhotoProfileInfo = async ({
     return true;
   } catch (error) {
     logger.error(error);
-    throw new AppError(`360_NOT_SET_ABOUT: ${error}`);
+    throw new AppError(`360_NOT_SET_PHOTO: ${error}`);
   }
 };
 
