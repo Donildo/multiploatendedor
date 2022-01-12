@@ -17,8 +17,8 @@ export const initMessengerBot = async (
     // const io = getIO();
 
     const accessToken = connection.tokenAPI;
-    const appId = process.env.VUE_FACEBOOK_APP_ID;
-    // const appSecret = "";
+    const appId = connection.fbAppId;
+    // // const appSecret = "";
     // const password = "";
     if (!accessToken) {
       throw new Error("Not token configured");
@@ -30,8 +30,8 @@ export const initMessengerBot = async (
 
     const messengerClient = new MessengerClient({
       accessToken,
-      appId,
-      appSecret
+      appId
+      // appSecret
       // version: '6.0',
     }) as Session;
 
