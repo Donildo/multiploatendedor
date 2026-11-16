@@ -1,34 +1,29 @@
-FROM node:18-bookworm-slim as global-deps-stage
+FROM node:16-bullseye-slim
 
 WORKDIR /app
 
-RUN apt-get update \
-  && apt-get install -y wget gnupg nano ffmpeg=7:5.1.4-0+deb12u1 \
-  && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-  && apt-get update \
-  && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-  --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/* && npm install pm2@latest -g
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
+  && apt-get update -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false \
+  && apt-get install -y --no-install-recommends \
+    git wget curl ca-certificates \
+    ffmpeg \
+    chromium \
+    fonts-liberation fonts-noto-color-emoji \
+    libxss1 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
+    libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libgtk-3-0 \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g pm2
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV NODE_ENV=dev
-ENV CHROME_BIN=google-chrome-stable
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV CHROME_BIN=/usr/bin/chromium
+ENV NODE_ENV=development
 
-FROM global-deps-stage as develop-stage
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
-FROM develop-stage as build-stage
 COPY . .
 RUN npm run build
 
-FROM build-stage as development-stage
-ENV NODE_ENV=development
+EXPOSE 3000 3100
 ENTRYPOINT ["npm", "run", "dev:server"]
-
-FROM build-stage as production-stage
-ENV NODE_ENV=production
-COPY docker-entrypoint.sh .
-RUN chmod +x docker-entrypoint.sh
-ENTRYPOINT ["./docker-entrypoint.sh"]
